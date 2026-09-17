@@ -7,8 +7,29 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer les dependances
+        working-directory: starter-app/starter-app2
+        run: pip install -r requirements.txt
+
+      - name: Lancer Flake8
+        working-directory: starter-app/starter-app2
+        run: flake8 . --config=flake8-config.txt
+
   test:
     runs-on: ubuntu-latest
+    needs: lint
 
     steps:
       - name: Recuperer le code
