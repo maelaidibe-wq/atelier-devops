@@ -1,8 +1,19 @@
+import os
+import redis
+
 from flask import Flask, jsonify
 
 app = Flask(__name__)
 
 ALERT_THRESHOLD = 25
+
+
+def get_redis_client():
+    return redis.Redis(
+        host=os.getenv("REDIS_HOST", "redis"),
+        port=6379,
+        decode_responses=True
+    )
 
 
 def alert_threshold():
@@ -25,5 +36,12 @@ def status():
     return jsonify(service="projet-devops-groupe-demo", version="1.0"), 200
 
 
+@app.route("/visits")
+def visits():
+    redis_client = get_redis_client()
+    count = redis_client.incr("visits")
+    return jsonify(visits=count), 200
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

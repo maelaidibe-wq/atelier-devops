@@ -47,3 +47,15 @@ Un rapport de couverture HTML est généré avec pytest-cov. Les rapports sont d
 - `coverage-html-3.10`
 - `coverage-html-3.11`
 - `coverage-html-3.12`
+
+## Séance 3 - Conteneurisation Docker
+
+L'application Flask a été conteneurisée avec Docker puis optimisée avec un build multi-stage.
+
+### Construction de l'image
+
+Depuis le dossier `starter-app-docker` :
+
+```bash
+docker build -t starter-app-multistage:1.0 .
+
