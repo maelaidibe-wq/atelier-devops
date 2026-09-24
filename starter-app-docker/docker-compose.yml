@@ -9,6 +9,7 @@ services:
     environment:
       REDIS_HOST: redis
       DEPLOY_COLOR: blue
+      COMMIT_SHA: ${COMMIT_SHA:-unknown}
     depends_on:
       redis:
         condition: service_healthy
@@ -25,6 +26,7 @@ services:
     environment:
       REDIS_HOST: redis
       DEPLOY_COLOR: green
+      COMMIT_SHA: ${COMMIT_SHA:-unknown}
     depends_on:
       redis:
         condition: service_healthy

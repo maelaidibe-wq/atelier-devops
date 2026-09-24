@@ -106,6 +106,10 @@ jobs:
     needs: build-and-push
     environment: production
 
+    env:
+      COMMIT_SHA: ${{ github.sha }}
+      EXPECTED_SHA: ${{ github.sha }}
+
     steps:
       - name: Recuperer le code
         uses: actions/checkout@v4
