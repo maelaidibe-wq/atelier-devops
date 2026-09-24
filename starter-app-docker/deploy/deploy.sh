@@ -15,6 +15,9 @@ fi
 echo "Couleur active : $ACTIVE"
 echo "Nouvelle couleur : $IDLE"
 
+echo "Demarrage de l'infrastructure de base"
+docker compose up -d redis nginx
+
 docker compose --profile "$IDLE" up -d --build "app-$IDLE"
 
 READY=0
@@ -57,6 +60,6 @@ docker exec starter-app-docker-nginx-1 nginx -s reload
 
 echo "$IDLE" > deploy/active_color
 
-docker compose --profile "$ACTIVE" stop "app-$ACTIVE"
+docker compose --profile "$ACTIVE" stop "app-$ACTIVE" || true
 
 echo "Deploiement reussi : $IDLE est maintenant actif"
