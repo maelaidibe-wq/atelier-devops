@@ -41,7 +41,8 @@ def status():
     return jsonify(
         service="projet-devops-groupe-demo",
         version="1.0",
-        deploy_color=os.getenv("DEPLOY_COLOR", "unknown")
+        deploy_color=os.getenv("DEPLOY_COLOR", "unknown"),
+        commit_sha=os.getenv("COMMIT_SHA", "unknown")
     ), 200
 
 
