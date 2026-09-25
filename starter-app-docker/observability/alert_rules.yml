@@ -1,0 +1,14 @@
+groups:
+  - name: application
+    rules:
+      - alert: TauxErreurEleve
+        expr: >
+          sum(rate(http_requests_total{status=~"5.."}[1m]))
+          /
+          sum(rate(http_requests_total[1m])) > 0.05
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taux d'erreur eleve"
+          description: "Le taux d'erreur HTTP depasse 5% depuis au moins 30 secondes."

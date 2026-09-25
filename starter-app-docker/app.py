@@ -1,11 +1,30 @@
 import os
+import time
 import redis
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, Response
+from prometheus_client import (
+    Counter,
+    Histogram,
+    generate_latest,
+    CONTENT_TYPE_LATEST
+)
 
 app = Flask(__name__)
 
 ALERT_THRESHOLD = 25
+
+REQUEST_COUNT = Counter(
+    "http_requests_total",
+    "Nombre total de requetes HTTP recues",
+    ["method", "endpoint", "status"]
+)
+
+REQUEST_DURATION = Histogram(
+    "http_request_duration_seconds",
+    "Duree de traitement d'une requete HTTP, en secondes",
+    ["method", "endpoint"]
+)
 
 
 def get_redis_client():
@@ -24,6 +43,33 @@ def alert_threshold():
 def sanitize_input(value):
     """Echappe les caracteres dangereux d'une entree utilisateur."""
     return value.replace("<", "&lt;").replace(">", "&gt;")
+
+
+@app.before_request
+def start_request_timer():
+    request._metrics_start = time.perf_counter()
+
+
+@app.after_request
+def record_request_metrics(response):
+    if request.path == "/metrics":
+        return response
+
+    endpoint = request.url_rule.rule if request.url_rule else "unmatched"
+    duration = time.perf_counter() - request._metrics_start
+
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=endpoint,
+        status=response.status_code
+    ).inc()
+
+    REQUEST_DURATION.labels(
+        method=request.method,
+        endpoint=endpoint
+    ).observe(duration)
+
+    return response
 
 
 @app.route("/health")
@@ -51,6 +97,19 @@ def visits():
     redis_client = get_redis_client()
     count = redis_client.incr("visits")
     return jsonify(visits=count), 200
+
+
+@app.route("/simulate-error")
+def simulate_error():
+    return jsonify(error="simulated error"), 500
+
+
+@app.route("/metrics")
+def metrics():
+    return Response(
+        generate_latest(),
+        mimetype=CONTENT_TYPE_LATEST
+    )
 
 
 if __name__ == "__main__":
